@@ -58,23 +58,32 @@ router.post('/register', (req, res) => {
     })
 })
 
-/*
 router.post('/login', async (req, res) => {
+    console.log('Login request for ' + JSON.stringify(req.body))
     var loginData = req.body
+    if (!loginData.username || !loginData.pwd){
+        return res.status(400).send({ message: 'Missing login data' })
+    }
 
-    var user = await User.findOne({ email: loginData.email })
+    console.log('Login attempted for user ' + loginData.username)
 
-    if (!user)
-        return res.status(401).send({ message: 'Email or Password invalid' })
+    db.query("SELECT password FROM users WHERE username = ?", [loginData.username], function (err, result, fields) {
+        if (err) throw err;
+    
+        if (result[0] != null){
+            console.log('Found user with password: ' + result[0].password)
 
-    bcrypt.compare(loginData.pwd, user.pwd, (err, isMatch) => {
-        if (!isMatch)
-            return res.status(401).send({ message: 'Email or Password invalid' })
+            bcrypt.compare(loginData.pwd, result[0].password, (err, isMatch) => {
+                if (isMatch) {
+                    createSendToken(res, loginData.username)
+                    return
+                }
 
-        createSendToken(res, user)
+                return res.status(401).send({ message: 'Email or Password invalid' })
+            })
+        }
     })
 })
-*/
 
 function createSendToken(res, username) {
     console.log('Creating and sending a token')
