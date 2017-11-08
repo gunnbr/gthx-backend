@@ -52,7 +52,13 @@ router.post('/register', (req, res) => {
                     console.log('Result: ' + result);
                     console.log('Fields: ' + fields);
                     console.log('User created successfully')
-                    createSendToken(res, userData.username)
+                    var permissions = {
+                        canEditFactoids: 0,
+                        canCreateUsers: 0,
+                        canLockFactoids: 0
+                    }
+
+                    createSendToken(res, userData.username, permissions)
                 });
             })
     })
@@ -67,15 +73,23 @@ router.post('/login', async (req, res) => {
 
     console.log('Login attempted for user ' + loginData.username)
 
-    db.query("SELECT password FROM users WHERE username = ?", [loginData.username], function (err, result, fields) {
+    db.query("SELECT password,canEditFactoids,canLockFactoids,canCreateUsers FROM users WHERE username = ?", [loginData.username], function (err, result, fields) {
         if (err) throw err;
-    
-        if (result[0] != null){
-            console.log('Found user with password: ' + result[0].password)
 
-            bcrypt.compare(loginData.pwd, result[0].password, (err, isMatch) => {
+        var userData = result[0];
+
+        if (userData != null){
+            console.log('Found user with password: ' + userData.password)
+            console.log(JSON.stringify(userData))
+
+            bcrypt.compare(loginData.pwd, userData.password, (err, isMatch) => {
                 if (isMatch) {
-                    createSendToken(res, loginData.username)
+                    var permissions = {
+                        canEditFactoids: userData.canEditFactoids,
+                        canCreateUsers: userData.canCreateUsers,
+                        canLockFactoids: userData.canLockFactoids
+                    }
+                    createSendToken(res, loginData.username, permissions)
                     return
                 }
 
@@ -85,13 +99,12 @@ router.post('/login', async (req, res) => {
     })
 })
 
-function createSendToken(res, username) {
+function createSendToken(res, username, permissions) {
     console.log('Creating and sending a token')
     var payload = { sub: username }
 
     var token = jwt.encode(payload, '123')
-
-    res.status(200).send({ token })
+    res.status(200).send({ token: token, permissions })
 }
 
 var auth = {
