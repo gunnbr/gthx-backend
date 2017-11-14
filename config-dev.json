@@ -1,0 +1,8 @@
+{
+    "logLevel": "debug",
+    "dbHost": "localhost",
+    "dbUser": "gthxng",
+    "dbPassword": "I<3Angular!",
+    "dbDatabase": "gthxNg",
+    "jwtKey": "123"
+}

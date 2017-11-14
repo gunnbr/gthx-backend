@@ -3,12 +3,13 @@ var jwt = require('jwt-simple')
 var express = require('express')
 var router = express.Router()
 var mysql = require('mysql')
+var config = require('./config.js')
 
 var db=mysql.createConnection({
-    host: "localhost",
-    user: "gthxng",
-    password: "I<3Angular!",
-    database: "gthxNg"
+    host: config.settings.dbHost,
+    user: config.settings.dbUser,
+    password: config.settings.dbPassword,
+    database: config.settings.dbDatabase
 });
 
 db.connect(function(err) {
@@ -103,7 +104,7 @@ function createSendToken(res, username, permissions) {
     console.log('Creating and sending a token')
     var payload = { sub: username }
 
-    var token = jwt.encode(payload, '123')
+    var token = jwt.encode(payload, config.settings.jwtKey)
     res.status(200).send({ token: token, permissions })
 }
 
@@ -116,7 +117,7 @@ var auth = {
 
         var token = req.header('authorization').split(' ')[1]
 
-        var payload = jwt.decode(token, '123')
+        var payload = jwt.decode(token, config.settings.jwtKey)
 
         if (!payload)
             return res.status(401).send({ message: 'Unauthorized. Auth Header Invalid' })
