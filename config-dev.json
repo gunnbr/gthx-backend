@@ -3,6 +3,6 @@
     "dbHost": "localhost",
     "dbUser": "gthxng",
     "dbPassword": "I<3Angular!",
-    "dbDatabase": "gthxNg",
+    "dbDatabase": "gthxng",
     "jwtKey": "123"
 }

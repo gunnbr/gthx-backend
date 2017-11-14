@@ -34,9 +34,13 @@ app.get('/factoids/:search', (req, res) => {
     logger.info('Factoid search for ' + req.params.search)
     
     auth.db.query("SELECT item, value, nick FROM factoids WHERE item LIKE ?", [req.params.search], function (err, result, fields) {
-        if (err) throw err;
-
-        res.send(result)
+        if (err) {
+            logger.warn('Factoid search failed: ' + err)
+            res.status(500).send({ error: 'Internal Server Error' });
+        }
+        else {
+            res.send(result)
+        }
     })
 })
 
