@@ -44,6 +44,20 @@ app.get('/factoids/:search', (req, res) => {
     })
 })
 
+app.get('/stats/factoids', (req, res) => {
+    logger.debug('Factoid stats request')
+    
+    auth.db.query('select factoids.item as item,GROUP_CONCAT(value SEPARATOR " and also ") as value,count,lastreferenced from factoids join refs r on r.item=factoids.item WHERE r.item NOT IN ("botsnack","botsmack") GROUP BY factoids.item ORDER BY count desc, lastreferenced desc LIMIT 20', function (err, result, fields) {
+        if (err) {
+            logger.warn('Factoid stats request failed: ' + err)
+            res.status(500).send({ error: 'Internal Server Error' });
+        }
+        else {
+            res.send(result)
+        }
+    })
+})
+
 app.use('/auth', auth.router)
 
 var port = 3000
