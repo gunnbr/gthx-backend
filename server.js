@@ -26,9 +26,11 @@ if (config.settings.logLevel){
 app.use(cors())
 app.use(bodyParser.json())
 
-app.get('/', (req, res) => {
-    res.send('hello world')
-})
+app.use(express.static('client'));
+
+app.get('/', function(req, res){
+    res.sendFile(path.join(__dirname, 'client', 'index.html'));
+});
 
 app.get('/factoids/:search', (req, res) => {
     logger.info('Factoid search for ' + req.params.search)
