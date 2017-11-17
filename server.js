@@ -28,10 +28,6 @@ app.use(bodyParser.json())
 
 app.use(express.static('client'));
 
-app.get('/', function(req, res){
-    res.sendFile(path.join(__dirname, 'client', 'index.html'));
-});
-
 app.get('/factoids/:search', (req, res) => {
     logger.info('Factoid search for ' + req.params.search)
     
@@ -62,6 +58,36 @@ app.get('/stats/factoids', (req, res) => {
 
 app.use('/auth', auth.router)
 
+app.get('*', function(req, res){
+    res.sendFile(__dirname + '/client/index.html')
+})
+
 var port = 3000
 logger.info(`Server listening on port ${port}`)
-app.listen(port);
+var server = app.listen(port)
+
+// Close the app by attempting to close all connections, then
+// forcing a shutdown if that doesn't work.
+var gracefulShutdown = function() {
+    server.close(function() {
+        logger.info('Sucessfully closed all connections.')
+        process.exit()
+    })
+
+    // Give it 10 seconds for the graceful shutdown to work,
+    // then force exit.
+    setTimeout(function() {
+        logger.error('Timeout waiting for a graceful shutdown - forcing close')
+        process.exit()
+    }, 10*1000)
+}
+
+process.on('SIGTERM', function () {
+    logger.warn('SIGTERM: shutting down')
+    gracefulShutdown()
+});
+
+process.on('SIGINT', function () {
+    logger.warn('SIGINT: shutting down')
+    gracefulShutdown()
+});
