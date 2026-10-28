@@ -1,3 +1,6 @@
+> **Archived (October 2026).** This was an earlier version of the gthx.net website. It has been replaced
+> by [gunnbr/GthxWebsite](https://github.com/gunnbr/GthxWebsite), which now runs https://gthx.net.
+
 # gthx-backend
 Backend for gthx's website
 
